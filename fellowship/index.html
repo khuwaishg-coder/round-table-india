@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { margin:0; background:#F7F5F1; font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+    ::selection { background:#1E3A5F; color:#fff; }
+    @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } html { scroll-behavior: auto; } }
+
+    /* Attractive, tasteful motion touches used across the page */
+    .hover-lift { transition: transform .25s ease, box-shadow .25s ease; }
+    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 14px 30px rgba(20,22,26,0.12); }
+
+    .hover-zoom { overflow: hidden; }
+    .hover-zoom img, .hover-zoom image-slot { transition: transform .45s ease; display: block; }
+    .hover-zoom:hover img, .hover-zoom:hover image-slot { transform: scale(1.06); }
+
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ''; position: absolute; left: 0; right: 100%; bottom: -4px; height: 2px;
+      background: #1E3A5F; transition: right .25s ease;
+    }
+    .nav-link:hover::after { right: 0; }
+
+    .csr-arrow { transition: transform .15s ease, background .15s ease; }
+    .csr-arrow:hover { background: rgba(20,22,26,0.75) !important; transform: translateY(-50%) scale(1.1); }
+
+    .row-hover { transition: background-color .2s ease, padding-left .2s ease; }
+    .row-hover:hover { background-color: rgba(30,58,95,0.04); padding-left: 6px; }
+
+    /* Scroll-reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+
+    .reveal-stagger > * { opacity: 0; transform: translateY(20px); transition: opacity .55s ease, transform .55s ease; }
+    .reveal-stagger.in-view > * { opacity: 1; transform: translateY(0); }
+    .reveal-stagger.in-view > *:nth-child(4n+1) { transition-delay: .03s; }
+    .reveal-stagger.in-view > *:nth-child(4n+2) { transition-delay: .1s; }
+    .reveal-stagger.in-view > *:nth-child(4n+3) { transition-delay: .17s; }
+    .reveal-stagger.in-view > *:nth-child(4n+4) { transition-delay: .24s; }
+
+    /* Sticky nav shrink */
+    .site-nav { transition: box-shadow .25s ease; }
+    .site-nav.nav-compact { box-shadow: 0 2px 14px rgba(20,22,26,0.08); }
+    .site-nav.nav-compact .nav-inner { padding-top: 10px !important; padding-bottom: 10px !important; }
+    .site-nav.nav-compact .nav-logo { height: 28px !important; }
+
+    /* CSR slideshow: no automatic fade animation */
+    .csr-photo { animation: none; }
+
+    /* Search overlay entrance */
+    @keyframes overlay-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .overlay-anim { animation: overlay-in .3s ease; }
+
+    /* Member drawer slide-in */
+    @keyframes drawer-in { from { opacity: 0; transform: translateX(36px); } to { opacity: 1; transform: translateX(0); } }
+    .drawer-anim { animation: drawer-in .3s ease; }
+
+    /* Back to top */
+    .back-to-top {
+      position: fixed; right: 24px; bottom: 24px; z-index: 60;
+      width: 46px; height: 46px; border-radius: 50%; background: #1E3A5F; color: #fff;
+      display: flex; align-items: center; justify-content: center; text-decoration: none;
+      box-shadow: 0 8px 20px rgba(20,22,26,0.2);
+      opacity: 0; transform: translateY(12px); pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .back-to-top:hover { background: #16304D; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fade-up .7s ease both; }
+    .fade-up-delay-1 { animation: fade-up .7s ease .12s both; }
+    .fade-up-delay-2 { animation: fade-up .7s ease .24s both; }
+    .splash-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(247,245,241,0.82);
+      pointer-events: none;
+      animation: splash-fade 1.5s ease forwards;
+    }
+    .splash-logo {
+      width: 130px; height: 130px;
+      animation: splash-flash .65s ease-in-out 1;
+    }
+    @keyframes splash-flash {
+      0%   { opacity: 0;   transform: scale(0.72); }
+      35%  { opacity: 1;   transform: scale(1.12); }
+      60%  { opacity: 1;   transform: scale(0.96); }
+      100% { opacity: 1;   transform: scale(1); }
+    }
+    @keyframes splash-fade {
+      0%, 60% { opacity: 1; }
+      100%    { opacity: 0; visibility: hidden; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .splash-overlay { animation: none !important; opacity: 0 !important; visibility: hidden !important; }
+    }
+    .csr-arrow { width: 44px; height: 44px; }
+
+    /* Global safety net: no element's padding/border can push layout into overflow */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { max-width: 100%; overflow-x: hidden; }
+    img, image-slot { max-width: 100%; }
+
+    /* Hamburger menu below 880px: desktop links hide, mobile controls show */
+    @keyframes nav-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .nav-mobile-menu { animation: nav-menu-in .2s ease; }
+    @media (max-width: 880px) {
+      .rti-desktop-nav { display: none !important; }
+      .nav-mobile-controls { display: flex !important; }
+    }
+
+    @media (max-width: 640px) {
+      .csr-arrow { width: 36px; height: 36px; }
+      .meeting-photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .sports-photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+      .nav-inner { padding: 12px 16px !important; }
+    }
+    @media (max-width: 380px) {
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .meeting-photo-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .sports-photo-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .nav-inner { padding: 16px 24px !important; }
+    }
+
+    /* ---- Layout sections: responsive columns & padding ---- */
+    @media (max-width: 640px) {
+      #people, #grants, #events, #legacy,
+      #initiatives > div, #projects > div, #sports > div, #leadership > div {
+        padding: 64px 20px !important;
+      }
+      .hero-section { padding: 56px 20px 40px !important; }
+
+      .hero-section { grid-template-columns: 1fr !important; gap: 32px !important; }
+      .impact-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; padding: 40px 20px !important; }
+      .featured-grid { grid-template-columns: 1fr !important; gap: 28px !important; margin-bottom: 48px !important; }
+      .initiatives-grid { grid-template-columns: 1fr !important; }
+      .trips-grid { grid-template-columns: 1fr !important; }
+      .grants-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .grants-chart { gap: 8px !important; }
+      .leadership-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; }
+      .leadership-roles-grid { grid-template-columns: 1fr !important; }
+      .footer-grid { grid-template-columns: 1fr !important; gap: 36px !important; padding: 48px 20px 24px !important; }
+      footer > div:last-child { padding: 20px !important; }
+
+      .people-search { width: 100% !important; }
+      .drawer-anim { padding: 32px 24px !important; }
+      .search-input { font-size: 22px !important; }
+      .overlay-anim > div:first-child { padding: 20px 16px 0 !important; }
+      .overlay-anim > div:last-child { padding: 24px 16px !important; }
+
+      .event-row { grid-template-columns: 1fr !important; gap: 6px !important; padding: 18px 0 !important; }
+
+      .timeline-rail { padding-left: 0 !important; }
+      .timeline-line, .timeline-dot { display: none !important; }
+      .timeline-year { position: static !important; width: auto !important; text-align: left !important; margin-bottom: 4px !important; display: block; }
+
+      .back-to-top { width: 42px !important; height: 42px !important; right: 16px !important; bottom: 16px !important; }
+    }
+
+    @media (min-width: 641px) and (max-width: 1024px) {
+      #people, #grants, #events, #legacy,
+      #initiatives > div, #projects > div, #sports > div, #leadership > div {
+        padding: 80px 32px !important;
+      }
+      .hero-section { padding: 80px 32px 48px !important; gap: 40px !important; }
+      .impact-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .initiatives-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .trips-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .leadership-grid { grid-template-columns: repeat(3, 1fr) !important; }
+      .leadership-roles-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+  </style>
+</helmet>
+
+<div style="background:#F7F5F1;color:#14161A;min-height:100vh;">
+
+  <!-- SPLASH -->
+  <div class="splash-overlay" aria-hidden="true">
+    <img class="splash-logo" src="./assets/logos/rti-logo.png" alt="" />
+  </div>
+
+  <!-- NAV -->
+  <nav class="site-nav" style="position:sticky;top:0;z-index:40;background:rgba(247,245,241,0.92);backdrop-filter:blur(10px);border-bottom:1px solid #E3DFD3;">
+    <div class="nav-inner" style="max-width:1320px;margin:0 auto;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:padding .25s ease;">
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+        <img class="nav-logo" src="./assets/logos/rti-logo.png" alt="Round Table India" style="height:36px;width:auto;display:block;transition:height .25s ease;flex-shrink:0;" />
+        <img class="nav-logo" src="./assets/logos/rt222-logo.png" alt="Bangalore Titans RT 222" style="height:36px;width:auto;display:block;transition:height .25s ease;flex-shrink:0;" />
+        <img class="nav-logo" src="./assets/logos/lc122-logo.png" alt="Bangalore Titans LC 122" style="height:36px;width:auto;display:block;transition:height .25s ease;flex-shrink:0;" />
+      </div>
+      <div style="display:flex;align-items:center;gap:36px;" class="rti-desktop-nav">
+        <a href="#people" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;letter-spacing:0.01em;white-space:nowrap;">People</a>
+        <a href="./csr-activities.html" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">CSR_activites</a>
+        <a href="./fellowship-gallery.html" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">Fellowship</a>
+        <a href="#impact" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">Impact</a>
+        <a href="./meetings-gallery.html" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">Meetings</a>
+        <a href="./sports-activities.html" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">Sports_activites</a>
+        <a href="#legacy" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;white-space:nowrap;">About</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button onClick="{{ toggleSearch }}" aria-label="Search" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;transition:transform .15s ease;" onmouseover="this.style.transform='scale(1.12)';" onmouseout="this.style.transform='none';">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#14161A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="nav-mobile-controls" onClick="{{ toggleMobileMenu }}" aria-label="Menu" style="display:none;background:none;border:none;cursor:pointer;padding:6px;position:relative;width:22px;height:22px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14161A" stroke-width="2" stroke-linecap="round" style="position:absolute;top:6px;left:6px;display:{{ menuIconDisplay }};"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14161A" stroke-width="2" stroke-linecap="round" style="position:absolute;top:6px;left:6px;display:{{ closeIconDisplay }};"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+        </button>
+      </div>
+    </div>
+    <sc-if value="{{ mobileMenuOpen }}">
+      <div class="nav-mobile-menu" style="background:#F7F5F1;border-bottom:1px solid #E3DFD3;padding:8px 20px 20px;display:flex;flex-direction:column;">
+        <a href="#people" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">People</a>
+        <a href="./csr-activities.html" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">CSR_activites</a>
+        <a href="./fellowship-gallery.html" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">Fellowship</a>
+        <a href="#impact" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">Impact</a>
+        <a href="./meetings-gallery.html" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">Meetings</a>
+        <a href="./sports-activities.html" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;border-bottom:1px solid #E3DFD3;">Sports_activites</a>
+        <a href="#legacy" onClick="{{ closeMobileMenu }}" style="font-size:15px;color:#14161A;text-decoration:none;font-weight:500;padding:12px 4px;">About</a>
+      </div>
+    </sc-if>
+  </nav>
+
+  <!-- SEARCH OVERLAY -->
+  <sc-if value="{{ searchOpen }}">
+    <div class="overlay-anim" style="position:fixed;inset:0;z-index:100;background:#F7F5F1;display:flex;flex-direction:column;">
+      <div style="max-width:820px;width:100%;margin:0 auto;padding:32px 24px 0;">
+        <div style="display:flex;justify-content:flex-end;">
+          <button onClick="{{ toggleSearch }}" aria-label="Close search" style="background:none;border:none;cursor:pointer;padding:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" stroke="#14161A" stroke-width="2"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+          </button>
+        </div>
+        <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin:8px 0 18px;">SEARCH ROUND TABLE INDIA</div>
+        <input class="search-input" autoFocus="{{ true }}" value="{{ searchQuery }}" onChange="{{ setSearchQuery }}" placeholder="Search people, initiatives, projects, events…" style="width:100%;font-size:34px;font-family:'Source Serif 4',serif;border:none;border-bottom:2px solid #14161A;background:transparent;padding:10px 0;outline:none;color:#14161A;box-sizing:border-box;" />
+      </div>
+      <div style="max-width:820px;width:100%;margin:0 auto;padding:36px 24px;overflow-y:auto;flex:1;">
+        <sc-if value="{{ hasSearchResults }}">
+          <div style="display:flex;flex-direction:column;gap:28px;">
+            <sc-if value="{{ searchPeople.length }}">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;color:#8B7355;font-weight:600;margin-bottom:10px;">PEOPLE</div>
+                <sc-for list="{{ searchPeople }}" as="m" hint-placeholder-count="2">
+                  <div style="padding:10px 0;border-bottom:1px solid #E3DFD3;font-size:16px;">{{ m.name }} <span style="color:#5B5F66;font-size:13px;">— {{ m.position }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ searchInitiatives.length }}">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;color:#8B7355;font-weight:600;margin-bottom:10px;">INITIATIVES</div>
+                <sc-for list="{{ searchInitiatives }}" as="i" hint-placeholder-count="2">
+                  <div style="padding:10px 0;border-bottom:1px solid #E3DFD3;font-size:16px;">{{ i.title }} <span style="color:#5B5F66;font-size:13px;">— {{ i.year }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ searchProjects.length }}">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;color:#8B7355;font-weight:600;margin-bottom:10px;">PROJECTS</div>
+                <sc-for list="{{ searchProjects }}" as="p" hint-placeholder-count="2">
+                  <div style="padding:10px 0;border-bottom:1px solid #E3DFD3;font-size:16px;">{{ p.title }} <span style="color:#5B5F66;font-size:13px;">— {{ p.year }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ searchEvents.length }}">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;color:#8B7355;font-weight:600;margin-bottom:10px;">EVENTS</div>
+                <sc-for list="{{ searchEvents }}" as="e" hint-placeholder-count="2">
+                  <div style="padding:10px 0;border-bottom:1px solid #E3DFD3;font-size:16px;">{{ e.title }} <span style="color:#5B5F66;font-size:13px;">— {{ e.date }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- HERO -->
+  <section class="hero-section" style="max-width:1320px;margin:0 auto;padding:100px 40px 60px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;">
+    <div class="fade-up">
+      <div style="font-size:12px;letter-spacing:0.16em;color:#8B7355;font-weight:600;margin-bottom:22px;">ROUND TABLE INDIA</div>
+      <h1 style="font-family:'Source Serif 4',serif;font-weight:500;font-size:clamp(40px,5vw,64px);line-height:1.08;letter-spacing:-0.01em;margin:0 0 28px;color:#14161A;">
+        People, leadership and initiatives driving measurable impact.
+      </h1>
+      <p style="font-size:17px;line-height:1.6;color:#5B5F66;max-width:520px;margin:0 0 34px;">
+        A community of professionals across two chapters — building programs, funding change, and documenting the outcomes of their work across Karnataka and beyond.
+      </p>
+      <a href="#impact" style="display:inline-flex;align-items:center;gap:8px;background:#1E3A5F;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:14px 26px;letter-spacing:0.01em;transition:transform .2s ease, box-shadow .2s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 22px rgba(30,58,95,0.3)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+        Explore Our Impact <span>→</span>
+      </a>
+    </div>
+    <div class="fade-up-delay-1" style="width:100%;min-height:520px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:100%;">
+        <sc-for list="{{ heroCollagePhotos }}" as="p" hint-placeholder-count="4">
+          <div class="hover-zoom" style="overflow:hidden;border-radius:24px;box-shadow:0 18px 40px rgba(20,22,26,0.08);">
+            <img src="{{ p.photo }}" alt="{{ p.title || 'Fellowship photo' }}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACT STRIP -->
+  <section id="impact" style="border-top:1px solid #E3DFD3;border-bottom:1px solid #E3DFD3;background:#FBFAF7;">
+    <div class="reveal-stagger reveal impact-grid" style="max-width:1320px;margin:0 auto;padding:56px 40px;display:grid;grid-template-columns:repeat(5,1fr);gap:24px;">
+      <div>
+        <div class="counter" data-to="48" data-prefix="₹" data-suffix="L+" style="font-family:'Source Serif 4',serif;font-size:42px;color:#1E3A5F;">₹0L+</div>
+        <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;margin-top:6px;text-transform:uppercase;">Total Grants</div>
+      </div>
+      <div>
+        <div class="counter" data-to="12" style="font-family:'Source Serif 4',serif;font-size:42px;color:#14161A;">0</div>
+        <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;margin-top:6px;text-transform:uppercase;">Members</div>
+      </div>
+      <div>
+        <div class="counter" data-to="6" style="font-family:'Source Serif 4',serif;font-size:42px;color:#14161A;">0</div>
+        <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;margin-top:6px;text-transform:uppercase;">Initiatives</div>
+      </div>
+      <div>
+        <div class="counter" data-to="8" style="font-family:'Source Serif 4',serif;font-size:42px;color:#14161A;">0</div>
+        <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;margin-top:6px;text-transform:uppercase;">Projects</div>
+      </div>
+      <div>
+        <div class="counter" data-to="10" style="font-family:'Source Serif 4',serif;font-size:42px;color:#14161A;">0</div>
+        <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;margin-top:6px;text-transform:uppercase;">Years of Impact</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PEOPLE -->
+  <section id="people" class="reveal" style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;flex-wrap:wrap;gap:20px;">
+      <div>
+        <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">DIRECTORY</div>
+        <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0;">Our People</h2>
+      </div>
+      <input class="people-search" value="{{ peopleQuery }}" onChange="{{ setPeopleQuery }}" placeholder="Search members…" style="border:none;border-bottom:1px solid #14161A;background:transparent;font-size:15px;padding:8px 2px;outline:none;width:260px;max-width:100%;font-family:'Inter',sans-serif;box-sizing:border-box;" />
+    </div>
+
+    <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #E3DFD3;padding-bottom:20px;margin-bottom:8px;">
+      <div style="display:flex;gap:6px;">
+        <button onClick="{{ setPeopleRoleAll }}" style="background:none;border:none;cursor:pointer;font-size:13px;padding:6px 12px;font-weight:600;color:{{ peopleRoleAllColor }};">All</button>
+        <button onClick="{{ setPeopleRoleLeadership }}" style="background:none;border:none;cursor:pointer;font-size:13px;padding:6px 12px;font-weight:600;color:{{ peopleRoleLeadershipColor }};">Leadership</button>
+        <button onClick="{{ setPeopleRoleMember }}" style="background:none;border:none;cursor:pointer;font-size:13px;padding:6px 12px;font-weight:600;color:{{ peopleRoleMemberColor }};">Members</button>
+      </div>
+      <div style="width:1px;height:18px;background:#E3DFD3;"></div>
+      <select style="border:1px solid #E3DFD3;background:#FBFAF7;font-size:13px;padding:8px 12px;font-family:'Inter',sans-serif;">
+        <option value="All">All Chapters</option>
+      </select>
+    </div>
+
+    <div>
+      <sc-for list="{{ filteredMembers }}" as="m" hint-placeholder-count="6">
+        <div onClick="{{ m.onOpen }}" class="row-hover" style="display:grid;grid-template-columns:56px 1fr;align-items:center;gap:20px;padding:20px 8px;border-bottom:1px solid #E3DFD3;cursor:pointer;">
+          <image-slot id="member-{{ m.id }}" shape="circle" style="width:56px;height:56px;" placeholder="Photo"></image-slot>
+          <div>
+            <div style="font-size:16px;font-weight:600;">{{ m.name }}</div>
+            <div style="font-size:13px;color:#5B5F66;margin-top:2px;">{{ m.position }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- MEMBER PROFILE DRAWER -->
+  <sc-if value="{{ selectedMember }}">
+    <div style="position:fixed;inset:0;z-index:90;display:flex;justify-content:flex-end;">
+      <div onClick="{{ closeMember }}" style="position:absolute;inset:0;background:rgba(20,22,26,0.4);"></div>
+      <div class="drawer-anim" style="position:relative;width:min(520px,92vw);height:100%;background:#F7F5F1;overflow-y:auto;padding:48px 44px;box-shadow:-16px 0 40px rgba(0,0,0,0.12);">
+        <button onClick="{{ closeMember }}" style="background:none;border:none;cursor:pointer;padding:0;margin-bottom:32px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#14161A" stroke-width="2"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+        </button>
+        <div style="width:96px;height:96px;margin-bottom:22px;">
+          <image-slot id="member-drawer-{{ selectedMember.id }}" shape="circle" placeholder="Photo"></image-slot>
+        </div>
+        <h3 style="font-family:'Source Serif 4',serif;font-size:30px;margin:0 0 4px;">{{ selectedMember.name }}</h3>
+        <div style="font-size:14px;color:#5B5F66;margin-bottom:24px;">{{ selectedMember.position }}</div>
+        <sc-if value="{{ selectedMember.history }}">
+          <div style="height:1px;background:#E3DFD3;margin:24px 0;"></div>
+          <div style="font-size:11px;letter-spacing:0.12em;color:#8B7355;font-weight:600;margin-bottom:12px;">ROLE HISTORY</div>
+          <sc-for list="{{ selectedMember.history }}" as="h" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:9px 0;border-bottom:1px solid #E3DFD3;">
+              <span style="color:#5B5F66;">{{ h.year }}</span><span style="font-weight:500;">{{ h.role }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- INITIATIVES -->
+  <section id="initiatives" class="reveal" style="background:#FBFAF7;border-top:1px solid #E3DFD3;border-bottom:1px solid #E3DFD3;">
+    <div style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+      <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">PROGRAMS</div>
+      <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 56px;">CSR_activites</h2>
+
+      <sc-if value="{{ featuredInitiative }}">
+        <div class="featured-grid" style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:52px;align-items:center;margin-bottom:80px;">
+          <div class="csr-slideshow hover-zoom" style="position:relative;aspect-ratio:1200/963;border-radius:4px;overflow:hidden;background:#E3DFD3;">
+            <img src="{{ csrCurrent }}" alt="CSR activity photo" class="csr-photo" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            <button class="csr-arrow" onClick="{{ csrPrev }}" aria-label="Previous photo" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);border-radius:50%;background:rgba(20,22,26,0.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="csr-arrow" onClick="{{ csrNext }}" aria-label="Next photo" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);border-radius:50%;background:rgba(20,22,26,0.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button onClick="{{ csrAutoplay ? stopCsrAutoplay : startCsrAutoplay }}" style="position:absolute;bottom:12px;left:14px;background:rgba(20,22,26,0.55);color:#fff;font-size:12px;letter-spacing:0.04em;padding:8px 12px;border-radius:20px;border:none;cursor:pointer;backdrop-filter:blur(4px);">
+              {{ csrAutoplay ? 'Stop autoplay' : 'Play autoplay' }}
+            </button>
+            <div style="position:absolute;bottom:12px;right:14px;background:rgba(20,22,26,0.55);color:#fff;font-size:11px;letter-spacing:0.05em;padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px);">{{ csrPosition }}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;letter-spacing:0.08em;color:#8B7355;font-weight:600;text-transform:uppercase;margin-bottom:14px;">{{ featuredInitiative.category }} · {{ featuredInitiative.year }}</div>
+            <h3 style="font-family:'Source Serif 4',serif;font-size:30px;margin:0 0 16px;">{{ featuredInitiative.title }}</h3>
+            <p style="font-size:15px;line-height:1.7;color:#5B5F66;margin:0 0 26px;">{{ featuredInitiative.description }}</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;border-top:1px solid #E3DFD3;padding-top:22px;">
+              <div><div style="font-family:'Source Serif 4',serif;font-size:22px;">{{ featuredInitiative.grantAmount }}</div><div style="font-size:11px;color:#5B5F66;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">Grant</div></div>
+              <div><div style="font-family:'Source Serif 4',serif;font-size:22px;">{{ featuredInitiative.beneficiaries }}</div><div style="font-size:11px;color:#5B5F66;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">Beneficiaries</div></div>
+              <div><div style="font-family:'Source Serif 4',serif;font-size:22px;">{{ featuredInitiative.members }}</div><div style="font-size:11px;color:#5B5F66;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">Members</div></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="reveal-stagger initiatives-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#E3DFD3;">
+        <sc-for list="{{ otherInitiatives }}" as="i" hint-placeholder-count="5">
+          <div class="hover-lift" style="background:#FBFAF7;padding:32px 28px;position:relative;z-index:1;">
+            <div style="font-size:11px;letter-spacing:0.08em;color:#8B7355;font-weight:600;text-transform:uppercase;margin-bottom:12px;">{{ i.category }} · {{ i.year }}</div>
+            <h4 style="font-size:19px;font-weight:600;margin:0 0 10px;line-height:1.3;">{{ i.title }}</h4>
+            <p style="font-size:13.5px;line-height:1.6;color:#5B5F66;margin:0 0 18px;">{{ i.description }}</p>
+            <div style="font-size:12px;color:#14161A;display:flex;justify-content:space-between;border-top:1px solid #E3DFD3;padding-top:14px;">
+              <span>{{ i.location }}</span><span style="font-weight:600;">{{ i.grantAmount }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRANTS -->
+  <section id="grants" class="reveal" style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+    <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">FELLOWSHIP</div>
+    <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 20px;">Fellowship</h2>
+    <p style="font-size:15px;line-height:1.75;color:#5B5F66;max-width:720px;margin:0 0 40px;">A gallery of fellowship moments from our meetings and activities, showcasing the people and events that bring our community together.</p>
+    <div class="reveal-stagger fellowship-photo-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+      <sc-for list="{{ fellowshipPhotos }}" as="p" hint-placeholder-count="24">
+        <div class="hover-lift" style="background:#FBFAF7;position:relative;overflow:hidden;">
+          <div class="hover-zoom" style="aspect-ratio:4/3;overflow:hidden;"><img src="{{ p.photo }}" alt="{{ p.title || 'Fellowship photo' }}" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+          <div style="padding:16px;">
+            <div style="font-size:14px;font-weight:600;line-height:1.3;margin-bottom:6px;">{{ p.title || 'Fellowship photo' }}</div>
+            <div style="font-size:12px;color:#5B5F66;line-height:1.5;">{{ p.description || p.location || '' }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="events" class="reveal" style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+    <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">GATHERINGS</div>
+    <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 20px;">Meetings</h2>
+
+    <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;text-transform:uppercase;margin:44px 0 18px;">Upcoming</div>
+    <sc-for list="{{ upcomingEvents }}" as="e" hint-placeholder-count="2">
+      <div class="row-hover event-row" style="display:grid;grid-template-columns:120px 1fr auto;gap:26px;align-items:center;padding:22px 0;border-bottom:1px solid #E3DFD3;">
+        <div style="font-family:'Source Serif 4',serif;font-size:15px;color:#1E3A5F;font-weight:600;">{{ e.date }}</div>
+        <div>
+          <div style="font-size:17px;font-weight:600;margin-bottom:4px;">{{ e.title }}</div>
+          <div style="font-size:13.5px;color:#5B5F66;">{{ e.description }}</div>
+        </div>
+        <div style="font-size:13px;color:#5B5F66;">{{ e.location }}</div>
+      </div>
+    </sc-for>
+
+    <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;text-transform:uppercase;margin:44px 0 18px;">Past</div>
+    <sc-for list="{{ pastEvents }}" as="e" hint-placeholder-count="4">
+      <div class="row-hover event-row" style="display:grid;grid-template-columns:120px 1fr auto;gap:26px;align-items:center;padding:22px 0;border-bottom:1px solid #E3DFD3;">
+        <div style="font-family:'Source Serif 4',serif;font-size:15px;color:#5B5F66;font-weight:600;">{{ e.date }}</div>
+        <div>
+          <div style="font-size:17px;font-weight:600;margin-bottom:4px;">{{ e.title }}</div>
+          <div style="font-size:13.5px;color:#5B5F66;">{{ e.description }}</div>
+        </div>
+        <div style="font-size:13px;color:#5B5F66;">{{ e.location }}</div>
+      </div>
+    </sc-for>
+
+    <div style="font-size:12px;letter-spacing:0.08em;color:#5B5F66;text-transform:uppercase;margin:44px 0 18px;">Photos</div>
+    <div class="meeting-photo-grid reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:#E3DFD3;">
+      <sc-for list="{{ meetingPhotos }}" as="mp" hint-placeholder-count="33">
+        <div class="hover-lift" style="background:#FBFAF7;position:relative;z-index:1;">
+          <div class="hover-zoom" style="aspect-ratio:4/3;overflow:hidden;"><img src="{{ mp.photo }}" alt="{{ mp.title }}" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+          <div style="padding:18px;">
+            <div style="font-size:15px;font-weight:600;margin-bottom:6px;line-height:1.3;">{{ mp.title }}</div>
+            <div style="font-size:13px;color:#5B5F66;line-height:1.5;">{{ mp.description }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- SPORTS ACTIVITIES -->
+  <section id="sports" class="reveal" style="background:#FBFAF7;border-top:1px solid #E3DFD3;border-bottom:1px solid #E3DFD3;">
+    <div style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+      <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">ACTIVITIES</div>
+      <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 56px;">Sports_activites</h2>
+      <div class="sports-photo-grid reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        <sc-for list="{{ sportsPhotos }}" as="sp" hint-placeholder-count="29">
+          <div class="hover-zoom hover-lift" style="aspect-ratio:4/3;overflow:hidden;background:#E3DFD3;"><img src="{{ sp.photo }}" alt="Sports activity photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADERSHIP -->
+  <section id="leadership" class="reveal" style="background:#FBFAF7;border-top:1px solid #E3DFD3;border-bottom:1px solid #E3DFD3;">
+    <div style="max-width:1320px;margin:0 auto;padding:100px 40px;">
+      <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">GOVERNANCE</div>
+      <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 56px;">Leadership</h2>
+      <div class="reveal-stagger leadership-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:36px;margin-bottom:80px;">
+        <sc-for list="{{ leadership }}" as="l" hint-placeholder-count="5">
+          <div onClick="{{ l.onOpen }}" class="hover-lift" style="cursor:pointer;">
+            <div class="hover-zoom" style="aspect-ratio:3/4;margin-bottom:18px;"><image-slot id="leader-{{ l.id }}" shape="rect" placeholder="Portrait"></image-slot></div>
+            <div style="font-size:16px;font-weight:600;margin-bottom:4px;">{{ l.name }}</div>
+            <div style="font-size:13px;color:#1E3A5F;font-weight:600;">{{ l.position }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="border-top:1px solid #E3DFD3;padding-top:56px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:16px;margin-bottom:28px;">
+          <h3 style="font-family:'Source Serif 4',serif;font-size:24px;font-weight:500;margin:0;">Leadership Through the Years</h3>
+          <div style="font-size:13px;color:#5B5F66;">Board composition, {{ leadershipYear }}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;border-bottom:1px solid #E3DFD3;padding-bottom:24px;">
+          <sc-for list="{{ leadershipYears }}" as="y" hint-placeholder-count="11">
+            <button onClick="{{ y.onPick }}" style="background:{{ y.activeBg }};border:1px solid #E3DFD3;cursor:pointer;font-size:12.5px;padding:7px 14px;font-family:'Inter',sans-serif;color:{{ y.activeColor }};">{{ y.year }}</button>
+          </sc-for>
+        </div>
+        <div class="leadership-roles-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#E3DFD3;">
+          <sc-for list="{{ currentYearRoles }}" as="r" hint-placeholder-count="4">
+            <div onClick="{{ r.onOpen }}" style="background:#FBFAF7;padding:20px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:18px;">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.06em;color:#8B7355;font-weight:600;text-transform:uppercase;">{{ r.role }}</div>
+              </div>
+              <div style="font-size:15px;font-weight:600;color:#14161A;text-align:right;min-width:120px;">{{ r.name }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE / LEGACY -->
+  <section id="legacy" class="reveal" style="max-width:1020px;margin:0 auto;padding:100px 40px;">
+    <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">LEGACY</div>
+    <h2 style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 56px;">A Decade of Milestones</h2>
+    <div class="timeline-rail" style="position:relative;padding-left:100px;">
+      <div class="timeline-line" style="position:absolute;left:52px;top:8px;bottom:8px;width:1px;background:#E3DFD3;"></div>
+      <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="6">
+        <div style="position:relative;padding-bottom:44px;">
+          <div class="timeline-year" style="position:absolute;left:-100px;top:2px;width:44px;font-family:'Source Serif 4',serif;font-size:16px;color:#1E3A5F;font-weight:600;text-align:right;">{{ t.year }}</div>
+          <div class="timeline-dot" style="position:absolute;left:47px;top:6px;width:9px;height:9px;border-radius:50%;background:#1E3A5F;"></div>
+          <div style="font-size:17px;font-weight:600;margin-bottom:6px;">{{ t.title }}</div>
+          <div style="font-size:14px;color:#5B5F66;line-height:1.6;max-width:560px;">{{ t.description }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#14161A;color:#F7F5F1;">
+    <div class="footer-grid" style="max-width:1320px;margin:0 auto;padding:70px 40px 34px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:60px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:22px;">
+          <img src="./assets/logos/rti-logo.png" alt="Round Table India" style="height:32px;width:auto;display:block;" />
+          <div style="font-size:16px;font-weight:700;">ROUND TABLE INDIA</div>
+        </div>
+        <p style="font-size:13.5px;line-height:1.7;color:#A0A4AB;max-width:320px;">A community of professionals building leadership, opportunity and measurable impact across two chapters.</p>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:0.1em;color:#7C818A;margin-bottom:16px;text-transform:uppercase;">Explore</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a href="#people" style="color:#F7F5F1;text-decoration:none;font-size:13.5px;">People</a>
+          <a href="./csr-activities.html" style="color:#F7F5F1;text-decoration:none;font-size:13.5px;">CSR_activites</a>
+          <a href="#impact" style="color:#F7F5F1;text-decoration:none;font-size:13.5px;">Impact</a>
+          <a href="./meetings-gallery.html" style="color:#F7F5F1;text-decoration:none;font-size:13.5px;">Meetings</a>
+          <a href="./sports-activities.html" style="color:#F7F5F1;text-decoration:none;font-size:13.5px;">Sports_activites</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:0.1em;color:#7C818A;margin-bottom:16px;text-transform:uppercase;">Contact</div>
+        <div style="font-size:13.5px;color:#A0A4AB;line-height:1.9;">info@roundtableindia.org<br/>Bengaluru, Karnataka</div>
+      </div>
+    </div>
+    <div style="max-width:1320px;margin:0 auto;padding:24px 40px;border-top:1px solid #2A2D33;font-size:12px;color:#7C818A;">© 2026 Round Table India. All rights reserved.</div>
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <a href="#" class="back-to-top" aria-label="Back to top" onClick="{{ scrollToTop }}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+  </a>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    searchOpen: false, searchQuery: '',
+    peopleQuery: '', peopleRole: 'All',
+    selectedMemberId: null,
+    projectYear: 'All', projectCategory: 'All',
+    leadershipYear: '2026',
+    csrIndex: 0,
+    csrAutoplay: false,
+    mobileMenuOpen: false,
+  };
+
+  csrPhotoFiles = Array.from({ length: 33 }, (_, i) => `csr-${String(i + 1).padStart(2, '0')}.jpg`);
+  meetingPhotos = Array.from({ length: 33 }, (_, i) => {
+    const n = i + 1;
+    return {
+      id: String(n).padStart(2, '0'), title: `Meeting ${n}`, description: 'Add a caption',
+      photo: `./meeting-photos/meeting-${String(n).padStart(2, '0')}.jpg`,
+    };
+  });
+  sportsPhotos = Array.from({ length: 29 }, (_, i) => {
+    const n = i + 1;
+    return { id: String(n).padStart(2, '0'), photo: `./sports-photos/sport-${String(n).padStart(2, '0')}.jpg` };
+  });
+
+  fellowshipPhotos = Array.from({ length: 83 }, (_, i) => {
+    const n = i + 1;
+    return { id: String(n).padStart(2, '0'), title: `Fellowship ${n}`, photo: `./fellowship/${n}.jpg` };
+  });
+
+  members = [
+    { id: 'm1', name: 'TR. Ayush Aggarwal', roleType: 'Leadership', position: 'Chairman' },
+    { id: 'm2', name: 'CR. Mehak Kothari', roleType: 'Leadership', position: 'Chairperson' },
+    { id: 'm3', name: 'Chetan', roleType: 'Leadership', position: 'Vice-Chairman' },
+    { id: 'm4', name: 'Gun', roleType: 'Leadership', position: 'Vice-Chairperson' },
+    { id: 'm5', name: 'Harsh', roleType: 'Leadership', position: 'Secretary' },
+    { id: 'm6', name: 'Priyanka', roleType: 'Leadership', position: 'Secretary' },
+    { id: 'm7', name: 'Vineeth', roleType: 'Leadership', position: 'Treasurer' },
+    { id: 'm8', name: 'Payal', roleType: 'Leadership', position: 'Treasurer' },
+    { id: 'm9', name: 'Deven', roleType: 'Member', position: 'IPC & Fellowship Convenor' },
+    { id: 'm10', name: 'Mansi', roleType: 'Member', position: 'IPC & Fellowship Convenor' },
+    { id: 'm11', name: 'Mrignaini', roleType: 'Member', position: 'LAPD Convenor' },
+    { id: 'm12', name: 'Ankish', roleType: 'Member', position: 'LAPD Convenor' },
+    { id: 'm13', name: 'Arunabh', roleType: 'Member', position: 'Sports Convenor' },
+    { id: 'm14', name: 'Paridhi', roleType: 'Member', position: 'Sports Convenor' },
+    { id: 'm15', name: 'Neha', roleType: 'Member', position: 'Twinkler Convenor' },
+    { id: 'm16', name: 'Aditya M.', roleType: 'Member', position: 'Twinkler Convenor' },
+    { id: 'm17', name: 'Rajesh', roleType: 'Member', position: 'Project & Fundraiser Convenor' },
+    { id: 'm18', name: 'Payal', roleType: 'Member', position: 'Project & Fundraiser Convenor' },
+    { id: 'm19', name: 'Gun', roleType: 'Member', position: 'Regalia & Rendezvous Convenor' },
+    { id: 'm20', name: 'Paridhi', roleType: 'Member', position: 'Regalia & Rendezvous Convenor' },
+    { id: 'm21', name: 'Aditya R.', roleType: 'Member', position: 'Extension Convenor' },
+    { id: 'm22', name: 'Vidisha', roleType: 'Member', position: 'Extension Convenor' },
+    { id: 'm23', name: 'Kevin', roleType: 'Member', position: 'Publicity & IT Convenor' },
+    { id: 'm24', name: 'Gun', roleType: 'Member', position: 'Publicity & IT Convenor' },
+    { id: 'm25', name: 'Nagee', roleType: 'Member', position: 'Honorary Tabler' },
+    { id: 'm26', name: 'Rohit', roleType: 'Member', position: 'Honorary Tabler' },
+    { id: 'm27', name: 'Aishwarya', roleType: 'Member', position: 'Honorary Circler' },
+    { id: 'm28', name: 'Monika', roleType: 'Member', position: 'Honorary Circler' },
+    { id: 'm29', name: 'Vishal', roleType: 'Member', position: 'Advisory' },
+    { id: 'm30', name: 'Shautick', roleType: 'Member', position: 'Advisory' },
+    { id: 'm31', name: 'Swarna', roleType: 'Member', position: 'Advisory' },
+  ];
+
+  initiatives = [
+    { id: 'i1', title: 'Second Chance Learning', category: 'Education', year: 2023, location: 'Bengaluru', members: 14, grantAmount: '\u20b96.2L', beneficiaries: '1,200 students', description: 'A remedial-education program placing certified tutors in under-resourced government schools across Bengaluru\u2019s peripheral wards.', featured: true },
+    { id: 'i2', title: 'Clean Water Corridor', category: 'Environment', year: 2022, location: 'Coastal Karnataka', members: 9, grantAmount: '\u20b94.8L', beneficiaries: '3,000 residents', description: 'Rainwater harvesting and filtration infrastructure installed across six coastal villages facing seasonal water scarcity.' },
+    { id: 'i3', title: 'Vocational Bridge Program', category: 'Livelihood', year: 2024, location: 'Mysuru', members: 11, grantAmount: '\u20b95.1L', beneficiaries: '480 youth', description: 'Six-month vocational certification tracks in trades and digital services for young adults transitioning out of school.' },
+    { id: 'i4', title: 'Community Health Camps', category: 'Health', year: 2021, location: 'Multi-district', members: 18, grantAmount: '\u20b93.4L', beneficiaries: '9,600 patients', description: 'Quarterly free diagnostic and specialist camps run in partnership with local physicians across four districts.' },
+    { id: 'i5', title: 'Digital Literacy Drive', category: 'Education', year: 2023, location: 'Rural Karnataka', members: 7, grantAmount: '\u20b92.9L', beneficiaries: '2,100 learners', description: 'Basic computing and digital-payments literacy workshops delivered through mobile training units.' },
+    { id: 'i6', title: 'Girl Child Scholarship Fund', category: 'Education', year: 2020, location: 'Statewide', members: 22, grantAmount: '\u20b97.6L', beneficiaries: '340 scholars', description: 'Multi-year scholarships and mentorship for girls from low-income households pursuing secondary and higher education.' },
+  ];
+
+  projects = Array.from({ length: 13 }, (_, i) => {
+    const n = i + 1;
+    return {
+      id: `p${n}`, title: `Trip ${n}`, initiative: 'Trip', year: 2026, category: 'Trip',
+      location: 'Add location', status: 'Completed',
+      photo: `./trip-photos/trip-${String(n).padStart(2, '0')}.jpg`,
+    };
+  });
+
+  events = [
+    { id: 'e1', title: 'Annual Impact Assembly 2026', date: 'Sep 12', location: 'Bengaluru', status: 'Upcoming', description: 'Chapter-wide review of 2025 outcomes and induction of new members.' },
+    { id: 'e2', title: 'Joint Chapter Fundraiser', date: 'Oct 04', location: 'Mysuru', status: 'Upcoming', description: 'BTRT222 and VTLC122 joint fundraising dinner for the Vocational Bridge Program.' },
+    { id: 'e3', title: 'Second Chance Learning Launch', date: 'Mar 2023', location: 'Bengaluru', status: 'Past', description: 'Public launch of the remedial-education initiative with 40 founding tutors.' },
+    { id: 'e4', title: 'Coastal Water Summit', date: 'Nov 2022', location: 'Udupi', status: 'Past', description: 'Cross-district summit on rainwater infrastructure with local governance bodies.' },
+    { id: 'e5', title: 'Scholarship Fund 5-Year Review', date: 'Jan 2025', location: 'Bengaluru', status: 'Past', description: 'Review of five years of the Girl Child Scholarship Fund with alumnae panel.' },
+    { id: 'e6', title: 'Leadership Transition Ceremony', date: 'Jun 2025', location: 'Bengaluru', status: 'Past', description: 'Handover of chairmanship from Priya Nair to Ananya Rao.' },
+  ];
+
+  timeline = [
+    { year: '2016', title: 'BTRT222 Chartered', description: 'BTRT222 formally chartered in Bengaluru with 18 founding members.' },
+    { year: '2018', title: 'VTLC122 Chartered', description: 'VTLC122 established as a sister chapter serving coastal Karnataka.' },
+    { year: '2020', title: 'Girl Child Scholarship Fund Launched', description: 'First multi-year scholarship cohort funded jointly by both chapters.' },
+    { year: '2021', title: 'Community Health Camps Begin', description: 'Quarterly health camp program launched across four districts.' },
+    { year: '2022', title: 'Clean Water Corridor', description: 'First rainwater harvesting infrastructure delivered to coastal villages.' },
+    { year: '2024', title: '\u20b940L in Cumulative Grants', description: 'Combined chapters cross \u20b940 lakh in cumulative grant disbursement.' },
+    { year: '2025', title: 'Leadership Transition', description: 'New chairmanship and expanded governance structure adopted.' },
+  ];
+
+  grantsByYear = [
+    { year: '2020', amount: '\u20b94.1L', pct: 40 },
+    { year: '2021', amount: '\u20b95.6L', pct: 55 },
+    { year: '2022', amount: '\u20b96.9L', pct: 68 },
+    { year: '2023', amount: '\u20b98.2L', pct: 80 },
+    { year: '2024', amount: '\u20b910.1L', pct: 100 },
+    { year: '2025', amount: '\u20b99.4L', pct: 92 },
+  ];
+
+  leadershipByYear = [
+    { year: '2016', roles: [{ role: 'Chairman, BTRT222', name: 'Karan Bose' }, { role: 'Chairman, VTLC122', name: 'Farhan Sheikh' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Alok Verma' }] },
+    { year: '2017', roles: [{ role: 'Chairman, BTRT222', name: 'Karan Bose' }, { role: 'Chairman, VTLC122', name: 'Farhan Sheikh' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Alok Verma' }] },
+    { year: '2018', roles: [{ role: 'Chairman, BTRT222', name: 'Karan Bose' }, { role: 'Chairman, VTLC122', name: 'Farhan Sheikh' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2019', roles: [{ role: 'Chairman, BTRT222', name: 'Karan Bose' }, { role: 'Chairman, VTLC122', name: 'Rhea D\u2019Souza' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2020', roles: [{ role: 'Chairman, BTRT222', name: 'Priya Nair' }, { role: 'Chairman, VTLC122', name: 'Rhea D\u2019Souza' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2021', roles: [{ role: 'Chairman, BTRT222', name: 'Priya Nair' }, { role: 'Chairman, VTLC122', name: 'Rhea D\u2019Souza' }, { role: 'Secretary', name: 'Ritu Chawla' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2022', roles: [{ role: 'Chairman, BTRT222', name: 'Priya Nair' }, { role: 'Chairman, VTLC122', name: 'Rhea D\u2019Souza' }, { role: 'Secretary', name: 'Meera Iyer' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2023', roles: [{ role: 'Chairman, BTRT222', name: 'Priya Nair' }, { role: 'Chairman, VTLC122', name: 'Vikram Sehgal' }, { role: 'Secretary', name: 'Meera Iyer' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2024', roles: [{ role: 'Chairman, BTRT222', name: 'Ananya Rao' }, { role: 'Chairman, VTLC122', name: 'Vikram Sehgal' }, { role: 'Secretary', name: 'Meera Iyer' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2025', roles: [{ role: 'Chairman, BTRT222', name: 'Ananya Rao' }, { role: 'Chairman, VTLC122', name: 'Vikram Sehgal' }, { role: 'Secretary', name: 'Meera Iyer' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+    { year: '2026', roles: [{ role: 'Chairman, BTRT222', name: 'Ananya Rao' }, { role: 'Chairman, VTLC122', name: 'Vikram Sehgal' }, { role: 'Secretary', name: 'Meera Iyer' }, { role: 'Treasurer', name: 'Rohan Kapoor' }] },
+  ];
+
+  grantsByCategory = [
+    { category: 'Education', amount: '\u20b921.5L', pct: 100 },
+    { category: 'Health', amount: '\u20b910.2L', pct: 47 },
+    { category: 'Livelihood', amount: '\u20b98.6L', pct: 40 },
+    { category: 'Environment', amount: '\u20b97.7L', pct: 36 },
+  ];
+
+  setPeopleQuery = (e) => this.setState({ peopleQuery: e.target.value });
+  setPeopleRoleAll = () => this.setState({ peopleRole: 'All' });
+  setPeopleRoleLeadership = () => this.setState({ peopleRole: 'Leadership' });
+  setPeopleRoleMember = () => this.setState({ peopleRole: 'Member' });
+  openMemberId = (id) => { if (id) this.setState({ selectedMemberId: id }); };
+  closeMember = () => this.setState({ selectedMemberId: null });
+  toggleSearch = () => this.setState(s => ({ searchOpen: !s.searchOpen, searchQuery: '' }));
+  toggleMobileMenu = () => this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
+  closeMobileMenu = () => this.setState({ mobileMenuOpen: false });
+  setSearchQuery = (e) => this.setState({ searchQuery: e.target.value });
+  setProjectYearEvt = (e) => this.setState({ projectYear: e.target.value });
+  setProjectCategoryEvt = (e) => this.setState({ projectCategory: e.target.value });
+  setLeadershipYearTo = (y) => this.setState({ leadershipYear: y });
+  csrPrev = () => this.setState(s => ({ csrIndex: (s.csrIndex - 1 + this.csrPhotoFiles.length) % this.csrPhotoFiles.length }));
+  csrNext = () => this.setState(s => ({ csrIndex: (s.csrIndex + 1) % this.csrPhotoFiles.length }));
+  startCsrAutoplay = () => {
+    if (this._csrTimer) return;
+    this._csrTimer = setInterval(() => this.csrNext(), 4000);
+    this.setState({ csrAutoplay: true });
+  };
+  stopCsrAutoplay = () => {
+    clearInterval(this._csrTimer);
+    this._csrTimer = null;
+    this.setState({ csrAutoplay: false });
+  };
+  scrollToTop = (e) => { if (e && e.preventDefault) e.preventDefault(); if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+  componentDidMount() {
+    // Scroll-reveal: fade/slide sections & staggered grids in once when they enter view.
+    if (typeof IntersectionObserver !== 'undefined') {
+      this._revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            this._revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach((el) => this._revealObserver.observe(el));
+
+      // Animated counters in the Impact strip.
+      this._counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          this._counterObserver.unobserve(entry.target);
+          const el = entry.target;
+          const to = parseFloat(el.getAttribute('data-to') || '0');
+          const prefix = el.getAttribute('data-prefix') || '';
+          const suffix = el.getAttribute('data-suffix') || '';
+          const decimals = el.getAttribute('data-decimals') ? parseInt(el.getAttribute('data-decimals'), 10) : 0;
+          const dur = 1200;
+          const start = performance.now();
+          const step = (now) => {
+            const p = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);
+            const val = to * eased;
+            el.textContent = prefix + val.toFixed(decimals) + suffix;
+            if (p < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+      }, { threshold: 0.4 });
+      document.querySelectorAll('.counter').forEach((el) => this._counterObserver.observe(el));
+    }
+
+    // Sticky nav shrink + back-to-top visibility on scroll.
+    this._onScroll = () => {
+      const nav = document.querySelector('.site-nav');
+      if (nav) nav.classList.toggle('nav-compact', window.scrollY > 40);
+      const btt = document.querySelector('.back-to-top');
+      if (btt) btt.classList.toggle('visible', window.scrollY > 600);
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._csrTimer);
+    if (this._revealObserver) this._revealObserver.disconnect();
+    if (this._counterObserver) this._counterObserver.disconnect();
+    if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+  }
+
+  renderVals() {
+    const { peopleQuery, peopleRole, selectedMemberId, searchOpen, searchQuery, projectYear, projectCategory, mobileMenuOpen } = this.state;
+    const q = peopleQuery.trim().toLowerCase();
+    const filteredMembers = this.members.filter(m => {
+      if (peopleRole !== 'All' && m.roleType !== peopleRole) return false;
+      if (q && !(m.name.toLowerCase().includes(q) || m.position.toLowerCase().includes(q))) return false;
+      return true;
+    }).map(m => ({ ...m, onOpen: () => this.openMemberId(m.id) }));
+    const peopleRoleAllColor = peopleRole === 'All' ? '#1E3A5F' : '#14161A';
+    const peopleRoleLeadershipColor = peopleRole === 'Leadership' ? '#1E3A5F' : '#14161A';
+    const peopleRoleMemberColor = peopleRole === 'Member' ? '#1E3A5F' : '#14161A';
+    const selectedMember = this.members.find(m => m.id === selectedMemberId) || null;
+    const projectYears = ['All', ...Array.from(new Set(this.projects.map(p => String(p.year)))).sort().reverse()];
+    const projectCategories = ['All', ...Array.from(new Set(this.projects.map(p => p.category)))];
+    const filteredProjects = this.projects.filter(p => (projectYear === 'All' || String(p.year) === projectYear) && (projectCategory === 'All' || p.category === projectCategory));
+    const sq = searchQuery.trim().toLowerCase();
+    const searchPeople = sq ? this.members.filter(m => m.name.toLowerCase().includes(sq)).slice(0, 5) : [];
+    const searchInitiatives = sq ? this.initiatives.filter(i => i.title.toLowerCase().includes(sq)).slice(0, 5) : [];
+    const searchProjects = sq ? this.projects.filter(p => p.title.toLowerCase().includes(sq)).slice(0, 5) : [];
+    const searchEvents = sq ? this.events.filter(e => e.title.toLowerCase().includes(sq)).slice(0, 5) : [];
+    const hasSearchResults = !!(searchPeople.length || searchInitiatives.length || searchProjects.length || searchEvents.length);
+    const csrPhotos = this.csrPhotoFiles.map(f => './csr-photos/' + f);
+    const csrIndex = ((this.state.csrIndex % csrPhotos.length) + csrPhotos.length) % csrPhotos.length;
+    const csrCurrent = csrPhotos[csrIndex];
+    const csrPosition = (csrIndex + 1) + ' / ' + csrPhotos.length;
+    const featuredInitiative = this.initiatives.find(i => i.featured);
+    const otherInitiatives = this.initiatives.filter(i => !i.featured);
+    const leadership = this.members.filter(m => m.roleType === 'Leadership').map(m => ({ ...m, onOpen: () => this.openMemberId(m.id) }));
+    const upcomingEvents = this.events.filter(e => e.status === 'Upcoming');
+    const pastEvents = this.events.filter(e => e.status === 'Past');
+    const { leadershipYear } = this.state;
+    const currentYearBoard = this.leadershipByYear.find(y => y.year === leadershipYear);
+    const currentYearRoles = currentYearBoard ? currentYearBoard.roles.map(r => {
+      const match = this.members.find(m => m.name === r.name);
+      return { ...r, chapter: match ? match.chapter : (r.role.includes('VTLC122') ? 'VTLC122' : 'BTRT222'), onOpen: () => this.openMemberId(match ? match.id : null) };
+    }) : [];
+    const leadershipYears = this.leadershipByYear.map(y => ({ year: y.year, activeBg: y.year === leadershipYear ? '#1E3A5F' : 'none', activeColor: y.year === leadershipYear ? '#fff' : '#14161A', onPick: () => this.setLeadershipYearTo(y.year) }));
+    const allPhotos = [...this.meetingPhotos, ...this.sportsPhotos];
+    const heroCollagePhotos = allPhotos.slice(0, 4);
+
+    return {
+      filteredMembers, peopleQuery,
+      setPeopleQuery: this.setPeopleQuery,
+      peopleRole, peopleRoleAllColor, peopleRoleLeadershipColor, peopleRoleMemberColor,
+      setPeopleRoleAll: this.setPeopleRoleAll, setPeopleRoleLeadership: this.setPeopleRoleLeadership, setPeopleRoleMember: this.setPeopleRoleMember,
+      selectedMember, closeMember: this.closeMember,
+      searchOpen, searchQuery, toggleSearch: this.toggleSearch, setSearchQuery: this.setSearchQuery,
+      mobileMenuOpen, toggleMobileMenu: this.toggleMobileMenu, closeMobileMenu: this.closeMobileMenu,
+      menuIconDisplay: mobileMenuOpen ? 'none' : 'block', closeIconDisplay: mobileMenuOpen ? 'block' : 'none',
+      searchPeople, searchInitiatives, searchProjects, searchEvents, hasSearchResults,
+      featuredInitiative, otherInitiatives,
+      csrPhotos, csrCurrent, csrPosition, csrPrev: this.csrPrev, csrNext: this.csrNext,
+      csrAutoplay: this.state.csrAutoplay, startCsrAutoplay: this.startCsrAutoplay, stopCsrAutoplay: this.stopCsrAutoplay,
+      scrollToTop: this.scrollToTop,
+      filteredProjects, projectYear, projectCategory, projectYears, projectCategories,
+      setProjectYearEvt: this.setProjectYearEvt, setProjectCategoryEvt: this.setProjectCategoryEvt,
+      upcomingEvents, pastEvents, meetingPhotos: this.meetingPhotos,
+      sportsPhotos: this.sportsPhotos,
+      fellowshipPhotos: this.fellowshipPhotos,
+      leadership,
+      leadershipYear, leadershipYears, currentYearRoles,
+      timeline: this.timeline, grantsByYear: this.grantsByYear, grantsByCategory: this.grantsByCategory,
+      allPhotos, heroCollagePhotos,
+    };
+  }
+}
+</script>
+</body>
+</html>
