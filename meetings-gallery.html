@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meetings — Round Table India</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { max-width: 100%; overflow-x: hidden; }
+  img { max-width: 100%; }
+  body { margin:0; background:#F7F5F1; color:#14161A; font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  ::selection { background:#1E3A5F; color:#fff; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+  .nav-inner, .page-wrap { transition: padding .2s ease; }
+  @media (max-width: 640px) {
+    .nav-inner { padding: 14px 16px !important; }
+    .page-wrap { padding: 40px 16px 60px !important; }
+  }
+
+  .nav-link { position:relative; }
+  .nav-link::after { content:''; position:absolute; left:0; right:100%; bottom:-4px; height:2px; background:#1E3A5F; transition:right .25s ease; }
+  .nav-link:hover::after { right:0; }
+
+  @keyframes fade-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .page-title { animation: fade-up .6s ease both; }
+
+  .gallery-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  @media (max-width: 640px) { .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+  @media (min-width: 641px) and (max-width: 1024px) { .gallery-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+
+  @keyframes tile-in { from { opacity:0; transform:translateY(18px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .gallery-grid > div { opacity:0; animation: tile-in .6s ease forwards; overflow:hidden; background:#E3DFD3; }
+  .gallery-grid > div:nth-child(6n+1) { animation-delay: .03s; }
+  .gallery-grid > div:nth-child(6n+2) { animation-delay: .09s; }
+  .gallery-grid > div:nth-child(6n+3) { animation-delay: .15s; }
+  .gallery-grid > div:nth-child(6n+4) { animation-delay: .21s; }
+  .gallery-grid > div:nth-child(6n+5) { animation-delay: .27s; }
+  .gallery-grid > div:nth-child(6n+6) { animation-delay: .33s; }
+  .gallery-grid img { transition: transform .45s ease; display:block; }
+  .gallery-grid > div:hover img { transform: scale(1.08); }
+</style>
+</head>
+<body>
+
+<nav style="position:sticky;top:0;z-index:40;background:rgba(247,245,241,0.92);backdrop-filter:blur(10px);border-bottom:1px solid #E3DFD3;">
+  <div class="nav-inner" style="max-width:1320px;margin:0 auto;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="./assets/logos/rti-logo.png" alt="RTI logo" style="height:36px;width:auto;display:block;" />
+      <img src="./assets/logos/rt222-logo.png" alt="Bangalore Titans RT 222" style="height:36px;width:auto;display:block;" />
+      <img src="./assets/logos/lc122-logo.png" alt="Bangalore Titans LC 122" style="height:36px;width:auto;display:block;" />
+    </div>
+    <a href="./index.html" class="nav-link" style="font-size:13px;color:#14161A;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:6px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to site
+    </a>
+  </div>
+</nav>
+
+<div class="page-wrap" style="max-width:1320px;margin:0 auto;padding:56px 40px 80px;">
+  <div style="font-size:11px;letter-spacing:0.14em;color:#8B7355;font-weight:600;margin-bottom:10px;">GATHERINGS</div>
+  <h1 class="page-title" style="font-family:'Source Serif 4',serif;font-size:38px;font-weight:500;margin:0 0 40px;">Meetings</h1>
+
+  <div class="gallery-grid">
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-01.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-02.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-03.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-04.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-05.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-06.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-07.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-08.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-09.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-10.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-11.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-12.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-13.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-14.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-15.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-16.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-17.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-18.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-19.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-20.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-21.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-22.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-23.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-24.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-25.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-26.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-27.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-28.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-29.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-30.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-31.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-32.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+    <div style="aspect-ratio:4/3;"><img src="./meeting-photos/meeting-33.jpg" alt="Meetings photo" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>
+  </div>
+</div>
+
+<footer style="background:#14161A;color:#F7F5F1;">
+  <div style="max-width:1320px;margin:0 auto;padding:24px 40px;font-size:12px;color:#7C818A;">© 2026 Round Table India. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
